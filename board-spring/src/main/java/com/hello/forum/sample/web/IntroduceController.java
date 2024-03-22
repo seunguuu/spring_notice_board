@@ -13,7 +13,7 @@ public class IntroduceController {
 	@GetMapping("/introduce")
 	public String introduceJSP(Model model) {
 	
-		model.addAttribute("name", "유승훈");
+		model.addAttribute("name", "seunghun");
 		model.addAttribute("age", 26);
 		model.addAttribute("location", "Changwon");
 		
