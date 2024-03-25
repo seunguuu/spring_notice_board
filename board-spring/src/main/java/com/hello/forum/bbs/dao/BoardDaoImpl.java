@@ -19,6 +19,11 @@ public class BoardDaoImpl extends SqlSessionDaoSupport implements BoardDao {
 	}
 	
 	@Override
+	public SqlSessionTemplate getSqlSessionTemplate() {
+		return super.getSqlSessionTemplate();
+	}
+	
+	@Override
 	public int getBoardAllCount() {
 		// BoardDaoMapper.xml에 있는 namespace에서 동작하고 싶은 쿼리의 id를 적어줘야 한다.
 		// 그 결과를 return
@@ -28,7 +33,7 @@ public class BoardDaoImpl extends SqlSessionDaoSupport implements BoardDao {
 
 	@Override
 	public List<BoardVO> getAllBoard() {
-		return null;
+		return getSqlSession().selectList("com.hello.forum.bbs.dao.BoardDao.getAllBoard");
 	}
 
 }

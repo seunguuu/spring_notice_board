@@ -3,11 +3,13 @@ package com.hello.forum.bbs.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.hello.forum.bbs.dao.BoardDao;
 import com.hello.forum.bbs.vo.BoardListVO;
 import com.hello.forum.bbs.vo.BoardVO;
 
+@Service
 public class BoardServiceImpl implements BoardService {
 
 	@Autowired
