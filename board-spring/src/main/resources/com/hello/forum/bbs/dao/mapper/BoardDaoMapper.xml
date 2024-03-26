@@ -16,7 +16,7 @@
 		 WHERE DEL_YN = 'N'
 	</select>
 	
-	<insert id="createNewBoard" parameterType="com.hello.forum.bbs.vo.BoardVO">
+	<insert id="insertNewBoard" parameterType="com.hello.forum.bbs.vo.BoardVO">
 		INSERT INTO BOARD
 		 (ID
 		, SUBJECT

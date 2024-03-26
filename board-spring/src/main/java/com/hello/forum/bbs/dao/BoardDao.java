@@ -23,7 +23,7 @@ public interface BoardDao {
 	/**
 	 * DB에 새로운 게시글을 등록한다.
 	 * @param boardVO 사용자가 입력한 게시글 정
-	 * @return DB에 INSERT한 개수 
+	 * @return 사용자가 DB에 INSERT한 개수 
 	 */
-	public int createNewBoard(BoardVO boardVO);
+	public int insertNewBoard(BoardVO boardVO);
 }
