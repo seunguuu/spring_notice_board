@@ -28,4 +28,13 @@ public class BoardServiceImpl implements BoardService {
 		return boardListVO;
 	}
 
+	@Override
+	public boolean createNewBoard(BoardVO boardVO) {
+		
+		// DB에 등록한 게시글의 개수를 반환 
+		int createCount = this.boardDao.createNewBoard(boardVO);
+		
+		return createCount > 0;
+	}
+
 }

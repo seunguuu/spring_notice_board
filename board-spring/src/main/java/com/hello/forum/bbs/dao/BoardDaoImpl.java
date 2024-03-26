@@ -23,12 +23,17 @@ public class BoardDaoImpl extends SqlSessionDaoSupport implements BoardDao {
 		// BoardDaoMapper.xml에 있는 namespace에서 동작하고 싶은 쿼리의 id를 적어줘야 한다.
 		// 그 결과를 return
 		// 하나의 목록을 조회할 것이기 때문에 selectOne을 사용해준다.
-		return getSqlSession().selectOne("com.hello.forum.bbs.dao.BoardDao.getBoardAllCount");
+		return getSqlSession().selectOne(BoardDao.NAME_SPACE + ".getBoardAllCount");
 	}
 
 	@Override
 	public List<BoardVO> getAllBoard() {
-		return getSqlSession().selectList("com.hello.forum.bbs.dao.BoardDao.getAllBoard");
+		return getSqlSession().selectList(BoardDao.NAME_SPACE + ".getAllBoard");
+	}
+
+	@Override
+	public int createNewBoard(BoardVO boardVO) {
+		return getSqlSession().insert(BoardDao.NAME_SPACE + ".createNewBoard");
 	}
 
 }

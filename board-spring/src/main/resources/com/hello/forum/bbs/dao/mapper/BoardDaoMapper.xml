@@ -16,4 +16,29 @@
 		 WHERE DEL_YN = 'N'
 	</select>
 	
+	<insert id="createNewBoard" parameterType="com.hello.forum.bbs.vo.BoardVO">
+		INSERT INTO BOARD
+		 (ID
+		, SUBJECT
+		, CONTENT
+		, EMAIL
+		, VIEW_CNT
+		, CRT_DT
+		, MDFY_DT
+		, FILE_NAME
+		, ORIGIN_FILE_NAME
+		, DEL_YN)
+		VALUES
+		 (SEQ_BOARD_PK.NEXTVAL
+		, #{subject}
+		, #{content}
+		, #{email}
+		, 0
+		, SYSDATE
+		, SYSDATE
+		, #{fileName}
+		, #{originFileName}
+		, 'N')
+	</insert>
+	
 </mapper>

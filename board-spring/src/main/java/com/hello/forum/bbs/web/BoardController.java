@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import com.hello.forum.bbs.service.BoardService;
 import com.hello.forum.bbs.vo.BoardListVO;
+import com.hello.forum.bbs.vo.BoardVO;
 
 @Controller
 public class BoardController {
@@ -34,4 +36,44 @@ public class BoardController {
 	public String viewBoardWritePage() {
 		return "board/boardwrite";
 	}
+	
+	
+	@PostMapping("/board/write")
+	public String doBoardWrite(BoardVO boardVO) {
+		
+		System.out.println("제목: " + boardVO.getSubject());
+		System.out.println("이메일: " + boardVO.getEmail());
+		System.out.println("내용: " + boardVO.getContent());
+		
+		
+		boolean isCreateSuccess = this.boardService.createNewBoard(boardVO);
+		
+		if(isCreateSuccess) {
+			System.out.println("글 등록 성공!");
+		}
+		else {
+			System.out.println("글 등록 실패!");
+		}
+		
+		return "redirect:/board/list";
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
