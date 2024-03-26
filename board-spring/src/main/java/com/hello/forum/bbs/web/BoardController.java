@@ -26,4 +26,12 @@ public class BoardController {
 		return "board/boardlist";
 	}
 	
+	/**
+	 * 게시글 작성 페이지를 보여주는 URL
+	 * @return
+	 */
+	@GetMapping("/board/write")
+	public String viewBoardWritePage() {
+		return "board/boardwrite";
+	}
 }
