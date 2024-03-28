@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.hello.forum.bbs.service.BoardService;
 import com.hello.forum.bbs.vo.BoardListVO;
@@ -59,8 +60,11 @@ public class BoardController {
 	}
 	
 	
-	
-	
+	@GetMapping("/board/view")
+	public String viewBoardDetailPage(@RequestParam int id) {
+		System.out.println("ID: " + id);
+		return "board/boardview";
+	}
 	
 	
 	
