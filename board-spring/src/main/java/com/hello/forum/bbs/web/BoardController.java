@@ -63,6 +63,15 @@ public class BoardController {
 	@GetMapping("/board/view")
 	public String viewBoardDetailPage(@RequestParam int id) {
 		System.out.println("ID: " + id);
+		
+		// boardService에게 파라미터로 전달받은 id 값을 보내준다.
+		
+		
+		// boardService는 파라미터로 전달받은 id의 게시글 정보를 조회해서 반환해주면 
+		
+		// boardview 페이지에 데이터를 전송해준다.
+		
+		// 화면을 보여준다.
 		return "board/boardview";
 	}
 	
