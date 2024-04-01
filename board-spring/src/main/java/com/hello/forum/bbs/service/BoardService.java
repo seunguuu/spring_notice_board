@@ -18,4 +18,11 @@ public interface BoardService {
 	 */
 	public boolean createNewBoard(BoardVO boardVO);
 	
+	/**
+	 * 전달받은 파라미터의 게시글 정보를 조회해 반환한다.
+	 * @param id 사용자가 조회하려는 게시글의 번
+	 * @return 게시글의 정
+	 */
+	public BoardVO getOneBoard(int id);
+	
 }

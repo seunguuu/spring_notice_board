@@ -37,4 +37,18 @@ public class BoardServiceImpl implements BoardService {
 		return createCount > 0;
 	}
 
+	@Override
+	public BoardVO getOneBoard(int id) {
+		// 게시글 정보 조회하기 
+		BoardVO boardVO = this.boardDao.selectOneBoard(id);
+		
+		// 게시글을 조회한 결과가 null 이라면, 잘못된 접근입니다. 예외를 발생시킨다. 
+		if(boardVO == null) {
+			throw new IllegalArgumentException("잘못된 접근입니다.");
+		}
+		
+		// 게시글 정보 반환 
+		return boardVO;
+	}
+
 }
