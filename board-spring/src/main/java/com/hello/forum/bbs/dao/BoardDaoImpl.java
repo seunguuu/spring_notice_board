@@ -36,4 +36,9 @@ public class BoardDaoImpl extends SqlSessionDaoSupport implements BoardDao {
 		return getSqlSession().insert(BoardDao.NAME_SPACE + ".insertNewBoard", boardVO);
 	}
 
+	@Override
+	public BoardVO selectOneBoard(int id) {
+		return getSqlSession().selectOne(BoardDao.NAME_SPACE + ".selectOneBoard", id);
+	}
+
 }

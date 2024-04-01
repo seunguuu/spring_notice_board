@@ -41,4 +41,20 @@
 		, 'N')
 	</insert>
 	
+	<select id="selectOneBoard" parameterType="_int" resultType="com.hello.forum.bbs.vo.BoardVO">
+		SELECT ID
+			 , SUBJECT
+			 , CONTENT
+			 , EMAIL
+			 , VIEW_CNT
+			 , CRT_DT
+			 , MDFY_DT
+			 , FILE_NAME
+			 , ORIGIN_FILE_NAME
+			 , DEL_YN
+		  FROM BOARD
+		 WHERE DEL_YN = 'N'
+		   AND ID = #{_parameter}
+	</select>
+	
 </mapper>

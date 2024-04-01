@@ -26,4 +26,11 @@ public interface BoardDao {
 	 * @return 사용자가 DB에 INSERT한 개수 
 	 */
 	public int insertNewBoard(BoardVO boardVO);
+
+	/**
+	 * 전달받은 파라미터로 게시글에서 데이터베이스를 조회해 반환한다.
+	 * @param id 조회하려는 게시글의 번호 
+	 * @return 조회된 게시글 정보 
+	 */
+	public BoardVO selectOneBoard(int id);
 }
