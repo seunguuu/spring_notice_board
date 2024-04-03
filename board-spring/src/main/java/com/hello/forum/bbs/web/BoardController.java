@@ -66,7 +66,7 @@ public class BoardController {
 		
 		// boardService에게 파라미터로 전달받은 id 값을 보내준다.
 		// boardService는 파라미터로 전달받은 id의 게시글 정보를 조회해서 반환해주면
-		BoardVO boardVO = this.boardService.getOneBoard(id);
+		BoardVO boardVO = this.boardService.getOneBoard(id, true);
 		
 		// boardview 페이지에 데이터를 전송해준다.		
 		model.addAttribute("boardVO", boardVO);

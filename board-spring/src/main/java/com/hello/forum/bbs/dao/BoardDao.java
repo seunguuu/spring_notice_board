@@ -33,4 +33,11 @@ public interface BoardDao {
 	 * @return 조회된 게시글 정보 
 	 */
 	public BoardVO selectOneBoard(int id);
+
+	/**
+	 * 전달받은 파라미터로 데이터베이스에서 해당 게시글의 조회수를 1 증가시킨다.
+	 * @param id 조회수를 증가시키려는 제시글의 번
+	 * @return 업데이트 영향을 받ㅇ느 데이터의 건수 
+	 */
+	public int increaseViewCount(int id);
 }
