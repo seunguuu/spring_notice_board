@@ -81,15 +81,31 @@ public class BoardController {
 	public String viewBoardModifyPage(@PathVariable int id, Model model) {
 		
 		// 전달받은 id의 값으로 게시글을 조회한다. 
-		this.boardService.getOneBoard(id, false);
+		BoardVO boardVO = this.boardService.getOneBoard(id, false);
 		// 게시글의 정보를 화면에 보내준다. 
+		model.addAttribute("boardVO", boardVO);
 		
 		// 화면을 보여준다.
 		return "board/boardmodify";
 	}
 	
 	
-	
+	@PostMapping("/board/modify{id}")
+	public String doBoardModify(@PathVariable int id, BoardVO boardVO) {
+		
+		boardVO.setId(id);
+		
+		boolean isUpdatedSuccess = this.boardService.updateOneBoard(boardVO);
+		
+		if(isUpdatedSuccess) {
+			System.out.println("수정 성공!");
+		}
+		else {
+			System.out.println("수정 실패!");
+		}
+		
+		return "redirect:/board/view?id=" + id;
+	}
 	
 	
 	
