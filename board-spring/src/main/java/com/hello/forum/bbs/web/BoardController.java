@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -76,7 +77,16 @@ public class BoardController {
 	}
 	
 	
-	
+	@GetMapping("/board/modify/{id}")
+	public String viewBoardModifyPage(@PathVariable int id, Model model) {
+		
+		// 전달받은 id의 값으로 게시글을 조회한다. 
+		this.boardService.getOneBoard(id, false);
+		// 게시글의 정보를 화면에 보내준다. 
+		
+		// 화면을 보여준다.
+		return "board/boardmodify";
+	}
 	
 	
 	
