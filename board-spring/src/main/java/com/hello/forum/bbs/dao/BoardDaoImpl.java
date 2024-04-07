@@ -46,4 +46,9 @@ public class BoardDaoImpl extends SqlSessionDaoSupport implements BoardDao {
 		return getSqlSession().update(BoardDao.NAME_SPACE + ".increaseViewCount", id);
 	}
 
+	@Override
+	public int updateOneBoard(BoardVO boardVO) {
+		return getSqlSession().update(BoardDao.NAME_SPACE + ".updateOneBoard", boardVO);
+	}
+
 }

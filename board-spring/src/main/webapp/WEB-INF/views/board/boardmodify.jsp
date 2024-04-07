@@ -34,16 +34,16 @@
             <label for="subject">제목</label>
             <input id="subject" type="text" name="subject" value="${boardVO.subject}" />
 
-            <label for="email"></label>
+            <label for="email">이메일</label>
             <input id="email" type="email" name="email" value="${boardVO.email}" />
 
-            <label for="content"></label>
+            <label for="content">내용</label>
             <textarea id="content" name="content" style="height: 300px">${boardVO.content}</textarea>
         </div>
 
         <div class="btn-group">
             <div class="right-align">
-                <input type="submit" value="수정" />
+                <input type="submit" value="저장" />
             </div>
         </div>
     </form>

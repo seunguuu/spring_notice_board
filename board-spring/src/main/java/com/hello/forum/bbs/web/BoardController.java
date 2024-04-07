@@ -90,7 +90,7 @@ public class BoardController {
 	}
 	
 	
-	@PostMapping("/board/modify{id}")
+	@PostMapping("/board/modify/{id}")
 	public String doBoardModify(@PathVariable int id, BoardVO boardVO) {
 		
 		boardVO.setId(id);

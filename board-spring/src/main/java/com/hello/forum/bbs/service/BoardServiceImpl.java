@@ -59,4 +59,12 @@ public class BoardServiceImpl implements BoardService {
 		return boardVO;
 	}
 
+	@Override
+	public boolean updateOneBoard(BoardVO boardVO) {
+		
+		int updatedCount = this.boardDao.updateOneBoard(boardVO);
+		
+		return updatedCount > 0;
+	}
+
 }

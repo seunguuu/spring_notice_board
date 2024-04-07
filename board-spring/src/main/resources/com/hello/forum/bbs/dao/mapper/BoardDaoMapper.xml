@@ -65,4 +65,14 @@
 		   AND ID = #{_parameter}
 	</update>
 	
+	<update id="updateOneBoard"
+			parameterType="com.hello.forum.bbs.vo.BoardVO">
+		UPDATE BOARD
+		   SET SUBJECT = #{subject}
+		     , EMAIL = #{email}
+		     , CONTENT = #{content}
+		     , MDFY_DT = SYSDATE
+		 WHERE ID = #{id}
+	</update>
+	
 </mapper>

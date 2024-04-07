@@ -25,5 +25,12 @@ public interface BoardService {
 	 * @return 게시글의 정보 
 	 */
 	public BoardVO getOneBoard(int id, boolean isIncrease);
+
+	/**
+	 * 전닯받은 게시물 정보로 게시물을 수정한다. 
+	 * @param boardVO 수정할 게시글의 정
+	 * @return 수정 성공 여부 
+	 */
+	public boolean updateOneBoard(BoardVO boardVO);
 	
 }
