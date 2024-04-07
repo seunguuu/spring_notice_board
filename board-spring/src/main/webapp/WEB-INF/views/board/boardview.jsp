@@ -29,6 +29,20 @@
         padding: 10px;
     }
 </style>
+<script type="text/javascript">
+    window.onload = function () {
+        // 삭제 링크를 클릭하면
+        var deleteAnchor = document.querySelector(".delete-board");
+        deleteAnchor.addEventListener("click", function () {
+            // 사용자에게 진짜 삭제할 것이냐 물어보고
+            var chooseValue = confirm("이 게시글을 정말 삭제하시겠습니까?\n삭제 작업은 복구할 수 없습니다.");
+
+            if(chooseValue){
+                location.href = "/board/delete/${boardVO.id}";
+            }
+        })
+    }
+</script>
 </head>
 <body>
     <h1>게시글 조회</h1>
@@ -54,7 +68,7 @@
         <div class="btn-group">
             <div class="right-align">
                 <a href="/board/modify/${boardVO.id}">수정</a>
-                <a href="/board/modify/${boardVO.id}">삭제</a>
+                <a class="delete-board" href="javascript:void(0);">삭제</a>
             </div>
         </div>
     </div>

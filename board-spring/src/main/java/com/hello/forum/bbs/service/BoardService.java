@@ -32,5 +32,12 @@ public interface BoardService {
 	 * @return 수정 성공 여부 
 	 */
 	public boolean updateOneBoard(BoardVO boardVO);
+
+	/**
+	 * 전달받은 게시글의 번호로 게시글을 삭제한다. (논리적 삭제) 
+	 * @param id 삭제할 게시글의 번호 
+	 * @return 삭제 성공 여부 
+	 */
+	public boolean deleteOneBoard(int id);
 	
 }

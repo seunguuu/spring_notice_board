@@ -48,4 +48,11 @@ public interface BoardDao {
 	 * @return 업데이트 영향을 받은 데잉터의 건수 
 	 */
 	public int updateOneBoard(BoardVO boardVO);
+
+	/**
+	 * 전달받은 게시글의 번호로 게시글을 논리적으로 삭제한다. 
+	 * @param id 삭제할 게시글의 번호 
+	 * @return 삭제 영향을 받은 데이터의 건수 
+	 */
+	public int deleteOneBoard(int id);
 }

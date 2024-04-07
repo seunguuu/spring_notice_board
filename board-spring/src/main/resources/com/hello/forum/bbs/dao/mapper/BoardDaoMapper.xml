@@ -75,4 +75,12 @@
 		 WHERE ID = #{id}
 	</update>
 	
+	<update id="deleteOneBoard"
+			parameterType="_int">
+		UPDATE BOARD
+		   SET DEL_YN = 'Y'
+		     , MDFY_DT = SYSDATE
+		 WHERE ID = #{_parameter}
+	</update>
+	
 </mapper>

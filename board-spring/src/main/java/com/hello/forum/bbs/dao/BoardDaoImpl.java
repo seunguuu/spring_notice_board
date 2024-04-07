@@ -51,4 +51,9 @@ public class BoardDaoImpl extends SqlSessionDaoSupport implements BoardDao {
 		return getSqlSession().update(BoardDao.NAME_SPACE + ".updateOneBoard", boardVO);
 	}
 
+	@Override
+	public int deleteOneBoard(int id) {
+		return getSqlSession().update(BoardDao.NAME_SPACE + ".deleteOneBoard", id);
+	}
+
 }

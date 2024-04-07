@@ -108,6 +108,20 @@ public class BoardController {
 	}
 	
 	
+	@GetMapping("/board/delete/{id}")
+	public String doDeleteBoard(@PathVariable int id) {
+		
+		boolean isDeletedSuccess = this.boardService.deleteOneBoard(id);
+		
+		if(isDeletedSuccess) {
+			System.out.println("게시글 삭제 성공.");
+		}
+		else {
+			System.out.println("게시글 삭제 실패.");
+		}
+		
+		return "redirect:/board/list";
+	}
 	
 	
 	
