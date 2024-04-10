@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -26,8 +27,19 @@
         padding: 10px;
     }
 </style>
+<script type="text/javascript">
+    window.onload = function () {
+        var dialog = document.querySelector(".alert-dialog");
+        dialog.showModal();
+    };
+</script>
 </head>
 <body>
+    <c:if test="${not empty errorMessage}">
+        <dialog class="alert-dialog">
+            <h1>${errorMessage}</h1>
+        </dialog>
+    </c:if>
     <h1>게시글 수정</h1>
     <form action="/board/modify/${boardVO.id}" method="post">
         <div class="grid">

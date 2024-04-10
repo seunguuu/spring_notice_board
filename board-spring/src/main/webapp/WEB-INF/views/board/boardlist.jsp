@@ -15,6 +15,8 @@
     table.table {
         border-collapse: collapse;
         border: 1px solid #ddd;
+        table-layout: fixed;
+        width: 100%;
     }
 
     table.table > thead > tr {
@@ -47,6 +49,18 @@
         color: #333;
     }
 
+    table.table > tbody td[colspan] {
+        text-align: center;
+    }
+
+    .ellipsis {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        display: block;
+        width: 100%;
+    }
+
     div.grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -57,6 +71,10 @@
     div.grid div.right-align {
         text-align: right;
     }
+
+    .left-align {
+        text-align: left;
+    }
 </style>
 </head>
 <body>
@@ -65,6 +83,14 @@
             총 ${boardList.boardCnt} 건의 게시글이 검색되었습니다.
         </div>
         <table class="table">
+            <colgroup>
+                <col width="80px"/>
+                <col width="*px"/>
+                <col width="150px"/>
+                <col width="80px"/>
+                <col width="150px"/>
+                <col width="150px"/>
+            </colgroup>
             <thead>
                 <tr>
                     <th>번호</th>
@@ -76,18 +102,30 @@
                 </tr>
             </thead>
             <tbody>
-                <c:forEach items="${boardList.boardList}" var="board">
-                    <tr>
-                        <td>${board.id}</td>
-                        <td>
-                            <a href="/board/view?id=${board.id}">${board.subject}</a>
-                        </td>
-                        <td>${board.email}</td>
-                        <td>${board.viewCnt}</td>
-                        <td>${board.crtDt}</td>
-                        <td>${board.mdfyDt}</td>
-                    </tr>
-                </c:forEach>
+                <c:choose>
+                    <c:when test="${not empty boardList.boardList}">
+                        <c:forEach items="${boardList.boardList}" var="board">
+                            <tr>
+                                <td>${board.id}</td>
+                                <td class="left-align">
+                                    <a class="ellipsis" href="/board/view?id=${board.id}">${board.subject}</a>
+                                </td>
+                                <td>${board.email}</td>
+                                <td>${board.viewCnt}</td>
+                                <td>${board.crtDt}</td>
+                                <td>${board.mdfyDt}</td>
+                            </tr>
+                        </c:forEach>
+                    </c:when>
+                    <c:otherwise>
+                        <tr>
+                            <td colspan="6">
+                                <a href="/board/write">등록된 게시글이 없습니다.</a>
+                            </td>
+                        </tr>
+                    </c:otherwise>
+                </c:choose>
+                
             </tbody>
         </table>
         <div class="right-align">

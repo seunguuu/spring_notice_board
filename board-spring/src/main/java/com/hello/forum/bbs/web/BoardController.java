@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.hello.forum.bbs.service.BoardService;
 import com.hello.forum.bbs.vo.BoardListVO;
 import com.hello.forum.bbs.vo.BoardVO;
+import com.hello.forum.utils.ValidationUtils;
 
 @Controller
 public class BoardController {
@@ -41,11 +42,47 @@ public class BoardController {
 	
 	
 	@PostMapping("/board/write")
-	public String doBoardWrite(BoardVO boardVO) {
+	public String doBoardWrite(BoardVO boardVO, Model model) {
+		
+		boolean isNotEmptySubject = ValidationUtils.notEmpty(boardVO.getSubject());
+		boolean isNotEmptyEmail = ValidationUtils.notEmpty(boardVO.getEmail());
+		boolean isNotEmptyContent = ValidationUtils.notEmpty(boardVO.getContent());
+		boolean isEmailFormat = ValidationUtils.email(boardVO.getEmail());
 		
 		System.out.println("제목: " + boardVO.getSubject());
 		System.out.println("이메일: " + boardVO.getEmail());
 		System.out.println("내용: " + boardVO.getContent());
+		
+		
+		if( !isNotEmptySubject ) {
+			// 제목을 입력하지 않았다면
+			model.addAttribute("errorMessage", "제목은 필수 입력 값입니다.");
+			model.addAttribute("boardVO", boardVO);
+			return "board/boardwrite";
+		}
+		
+		if( !isNotEmptyEmail ) {
+			// 제목을 입력하지 않았다면
+			model.addAttribute("errorMessage", "이메일은 필수 입력 값입니다.");
+			model.addAttribute("boardVO", boardVO);
+			return "board/boardwrite";
+		}
+		
+		if( !isNotEmptyContent ) {
+			// 제목을 입력하지 않았다면
+			model.addAttribute("errorMessage", "내용은 필수 입력 값입니다.");
+			model.addAttribute("boardVO", boardVO);
+			return "board/boardwrite";
+		}
+		
+		if( !isEmailFormat ) {
+			// 제목을 입력하지 않았다면
+			model.addAttribute("errorMessage", "이메일을 올바른 형태로 작성해주세요.");
+			model.addAttribute("boardVO", boardVO);
+			return "board/boardwrite";
+		}
+		
+		
 		
 		
 		boolean isCreateSuccess = this.boardService.createNewBoard(boardVO);
@@ -91,9 +128,46 @@ public class BoardController {
 	
 	
 	@PostMapping("/board/modify/{id}")
-	public String doBoardModify(@PathVariable int id, BoardVO boardVO) {
+	public String doBoardModify(@PathVariable int id, BoardVO boardVO, Model model) {
+		
+		
+		boolean isNotEmptySubject = ValidationUtils.notEmpty(boardVO.getSubject());
+		boolean isNotEmptyEmail = ValidationUtils.notEmpty(boardVO.getEmail());
+		boolean isNotEmptyContent = ValidationUtils.notEmpty(boardVO.getContent());
+		boolean isEmailFormat = ValidationUtils.email(boardVO.getEmail());
+		
 		
 		boardVO.setId(id);
+		
+		
+		if( !isNotEmptySubject ) {
+			// 제목을 입력하지 않았다면
+			model.addAttribute("errorMessage", "제목은 필수 입력 값입니다.");
+			model.addAttribute("boardVO", boardVO);
+			return "board/boardmodify";
+		}
+		
+		if( !isNotEmptyEmail ) {
+			// 제목을 입력하지 않았다면
+			model.addAttribute("errorMessage", "이메일은 필수 입력 값입니다.");
+			model.addAttribute("boardVO", boardVO);
+			return "board/boardmodify";
+		}
+		
+		if( !isNotEmptyContent ) {
+			// 제목을 입력하지 않았다면
+			model.addAttribute("errorMessage", "내용은 필수 입력 값입니다.");
+			model.addAttribute("boardVO", boardVO);
+			return "board/boardmodify";
+		}
+		
+		if( !isEmailFormat ) {
+			// 제목을 입력하지 않았다면
+			model.addAttribute("errorMessage", "이메일을 올바른 형태로 작성해주세요.");
+			model.addAttribute("boardVO", boardVO);
+			return "board/boardmodify";
+		}
+		
 		
 		boolean isUpdatedSuccess = this.boardService.updateOneBoard(boardVO);
 		
