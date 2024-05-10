@@ -4,14 +4,14 @@ package com.hello.forum.utils;
  * 유틸리티들은 추상클래스로 만들어 인스턴스화 못하게 한다.
  */
 public abstract class StringUtils {
-
+	
 	/**
-	 * 생성자를 private으로 숨겨서 익명클래스도 못만들게 막는다.
+	 * 생성자를 private 로 숨겨서 익명 클래스도 못만들게 막는다.
 	 */
 	private StringUtils() {
 		
 	}
-	
+
 	public final static boolean correctPasswordFormat(final String str) {
 		if (isEmpty(str)) {
 			return false;

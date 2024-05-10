@@ -1,14 +1,25 @@
 package com.hello.forum.member.vo;
 
 public class MemberVO {
-	
+
 	private String email;
 	private String name;
 	private String password;
-	private String delYn;
-	private String confirmPassword;
+	private String delYn; // del_yn
+	private String confirmPassword; // 비밀번호 확인
+	private String salt;
+	private String adminYn;
+	
+	private String provider;
 	
 	
+	
+	public String getProvider() {
+		return provider;
+	}
+	public void setProvider(String provider) {
+		this.provider = provider;
+	}
 	public String getEmail() {
 		return email;
 	}
@@ -38,6 +49,18 @@ public class MemberVO {
 	}
 	public void setConfirmPassword(String confirmPassword) {
 		this.confirmPassword = confirmPassword;
+	}
+	public String getSalt() {
+		return salt;
+	}
+	public void setSalt(String salt) {
+		this.salt = salt;
+	}
+	public String getAdminYn() {
+		return adminYn;
+	}
+	public void setAdminYn(String adminYn) {
+		this.adminYn = adminYn;
 	}
 	
 	

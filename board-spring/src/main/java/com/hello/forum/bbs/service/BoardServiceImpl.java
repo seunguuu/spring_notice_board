@@ -1,24 +1,77 @@
 package com.hello.forum.bbs.service;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.hello.forum.bbs.dao.BoardDao;
 import com.hello.forum.bbs.vo.BoardListVO;
 import com.hello.forum.bbs.vo.BoardVO;
+import com.hello.forum.bbs.vo.SearchBoardVO;
+import com.hello.forum.beans.FileHandler;
+import com.hello.forum.beans.FileHandler.StoredFile;
+import com.hello.forum.exceptions.PageNotFoundException;
 
+import io.github.seccoding.excel.option.ReadOption;
+import io.github.seccoding.excel.read.ExcelRead;
+
+
+/*
+ * @Service: @Controller와 @Repository를 연결하는 역할
+ * 		- 주로 Transaction 처리를 담당.
+ * 		- 업무 로직을 담당.
+ * 		- 업무 로직?
+ * 			- 토스.
+ * 				- 이체: 내 통장에서 출금해서 다른 통장으로 입금한다.
+ * 					- 1. 내 통장에서 출금한다.
+ * 					-----> 원인을 알 수 없는 예외가 발생!
+ * 					-----> 예외가 발생하면 Application이 종료된다.
+ * 					-----------> 내 통장에서 출금한 돈은 어딘가로 사라지고 없다!!!
+ * 					-----> 업무로직 진행 중에 예외가 발생할 경우, Rollback 처리를 하고
+ * 					-----> 업무로직이 정상적으로 종료가 되었다면 Commit 을 수행. --> Transaction.
+ * 					- 2. 출금한 돈을 다른 통장으로 입금한다.
+ * 				- 출금: 통장에서 돈을 뺀다.
+ * 				- 입금: 통장으로 돈을 넣는다.
+ * @Controller
+ * @Service
+ * @Repository
+ * 위 3개는 모두 Spring이 객체로 생성해서 Bean Container에 보관하는 역할
+ */
 @Service
-public class BoardServiceImpl implements BoardService {
+public class BoardServiceImpl implements BoardService{
+	
+	private Logger logger = LoggerFactory.getLogger(BoardServiceImpl.class);
 
+	/**
+	 * 멤버변수 위에 @Autowired를 작성하면
+	 * Bean Container에서 멤버변수의 타입과 일치하는 객체를 찾아서
+	 * 멤버변수에게 자동으로 할당해준다. (Spring)
+	 */
 	@Autowired
 	private BoardDao boardDao;
 	
+	@Autowired
+	private FileHandler fileHandler;
+	
 	@Override
 	public BoardListVO getAllBoard() {
-		
+		// BoardDaoImpl의 getBoardAllCount를 이용해서 게시글의 건 수를 알고 싶고
 		int boardCount = this.boardDao.getBoardAllCount();
+		// BoardDaoImpl의 getAllBoard를 이용해서 게시글의 목록을 알고싶다!
 		List<BoardVO> boardList = this.boardDao.getAllBoard();
 		
 		BoardListVO boardListVO = new BoardListVO();
@@ -27,52 +80,295 @@ public class BoardServiceImpl implements BoardService {
 		
 		return boardListVO;
 	}
-
+	
 	@Override
-	public boolean createNewBoard(BoardVO boardVO) {
+	public BoardListVO searchAllBoard(SearchBoardVO searchBoardVO) {
+		int boardCount = this.boardDao.searchBoardAllCount(searchBoardVO);
 		
-		// DB에 등록한 게시글의 개수를 반환 
-		int createCount = this.boardDao.insertNewBoard(boardVO);
+		searchBoardVO.setPageCount(boardCount);
 		
-		return createCount > 0;
+		List<BoardVO> boardList = this.boardDao.searchAllBoard(searchBoardVO);
+		
+		BoardListVO boardListVO = new BoardListVO();
+		boardListVO.setBoardCnt(boardCount);
+		boardListVO.setBoardList(boardList);
+		
+		return boardListVO;
 	}
 
+	@Transactional
 	@Override
-	public BoardVO getOneBoard(int id, boolean isIncrease) {
-		// 게시글 정보 조회하기 
-		BoardVO boardVO = this.boardDao.selectOneBoard(id);
+	public boolean createNewBoard(BoardVO boardVO, MultipartFile file) {
 		
-		// 게시글을 조회한 결과가 null 이라면, 잘못된 접근입니다. 예외를 발생시킨다. 
-		if(boardVO == null) {
-			throw new IllegalArgumentException("잘못된 접근입니다.");
-		}
-		
-		if(isIncrease) {
-			// 게시글의 조회수를 1 증가시키기
-			int updatedCount = this.boardDao.increaseViewCount(id);
-			if(updatedCount == 0) {
-				throw new IllegalArgumentException("잘못된 접근입니다.");
+		// 사용자가 파일을 업로드 했다면
+		if(file != null && ! file.isEmpty()) {
+			StoredFile storedFile = fileHandler.storeFile(file);
+			// 업로드한 파일을 서버에 정상적으로 업로드 한 경우.
+			if(storedFile != null) {
+				// 난독화 처리된 파일의 이름
+				boardVO.setFileName(storedFile.getRealFileName());
+				// 사용자가 업로드한 파일의 이름
+				boardVO.setOriginFileName(storedFile.getFileName());
 			}
 		}
 		
-		// 게시글 정보 반환 
+		int insertedCount = this.boardDao.insertNewBoard(boardVO);
+		
+		// NumberFormatException이 발생하면, 롤백된다!
+//		Integer.parseInt("aethberth");
+		
+		return insertedCount > 0;
+	}
+
+	@Transactional
+	@Override
+	public BoardVO getOneBoard(int id, boolean isIncrease) {
+		// 1. 게시글 정보 조회하기
+		BoardVO boardVO = this.boardDao.selectOneBoard(id);
+		
+		// 게시글을 조회한 결과가 null 이라면, 잘못된 접근입니다. 예외를 발생시킨다.
+		if(boardVO == null) {
+			throw new PageNotFoundException();
+		}
+		
+		if(isIncrease) {
+			// 2. 게시글의 조회수를 1 증가시키기
+			int updatedCount = this.boardDao.increaseViewCount(id);
+			if(updatedCount == 0) {
+				// 업데이트 영향을 받은 ROW가 단 한건도 없다면
+				// 사용자가 잘못 요청을 했더나 
+				// 부정적인 방법으로 시스템을 이용하는 중으로 판단.
+//				throw new IllegalArgumentException("잘못된 접근입니다.");
+			}			
+		}
+		
 		return boardVO;
 	}
 
+	@Transactional
 	@Override
-	public boolean updateOneBoard(BoardVO boardVO) {
+	public boolean updateOneBoard(BoardVO boardVO, MultipartFile file) {
+		
+		// 파일을 업로드 할 때 수정되기 전에있는 게시글의 정보를 가져와서 확인한다.
+		// 파일이 있으면 지우고 업로드한 파일을 서버에 저장한다.
+		
+		// 사용자가 파일을 업로드했는지 확인.
+		if(file != null && ! file.isEmpty()) { // 업로드를 하는 작업
+			// 기존의 게시글 내용을 확인.
+			// 사용자가 파일을 업로드한 경우, 기존에 업로드되었던 파일을 삭제하기 위해서!
+			// 기존에 첨부된 파일의 존재여부를 확인해야 한다.
+			BoardVO originalBoardVO = this.boardDao.selectOneBoard(boardVO.getId());
+			
+			// 기존 게시글에 첨부된 파일이 있는지 확인.
+			// 나 혼자 쓰는게 아니기때문에 Null Check가 필요한다(ex. 티켓팅 이미 결제된 좌석)
+			if(originalBoardVO != null) { // 파일을 지우는 작업
+				
+				// 파일을 지워야 하기 때문에
+				// 기존 게시글에 첨부된 파일의 이름을 받아온다.
+				String storedFileName = originalBoardVO.getFileName();
+				// 첨부된 파일의 이름이 있는지 확인한다.
+				// 만약, 첨부된 파일의 이름이 있다면, 이 게시글은 파일이 첨부되었던 게시글이다.
+				if(storedFileName != null && storedFileName.length() > 0) {
+					// 이 경우라면 파일이 첨부된 적이 있다는 것이다.
+					
+					// 첨부된 파일을 삭제한다.
+					this.fileHandler.deleteFileByFileName(storedFileName);
+				}
+				
+			}
+			
+			// 사용자가 업로드한 파일을 서버에 저장한다.
+			StoredFile storedFile = this.fileHandler.storeFile(file);
+			boardVO.setFileName(storedFile.getRealFileName());
+			boardVO.setOriginFileName(storedFile.getFileName());
+			
+		}
+		
 		
 		int updatedCount = this.boardDao.updateOneBoard(boardVO);
 		
 		return updatedCount > 0;
 	}
 
+	@Transactional
 	@Override
 	public boolean deleteOneBoard(int id) {
+		// 기존의 게시글 내용을 확인.
+		// 사용자가 파일을 업로드한 경우, 기존에 업로드되었던 파일을 삭제하기 위해서!
+		// 기존에 첨부된 파일의 존재여부를 확인해야 한다.
+		BoardVO originalBoardVO = this.boardDao.selectOneBoard(id);
+		
+		// 기존 게시글에 첨부된 파일이 있는지 확인.
+		// 나 혼자 쓰는게 아니기때문에 Null Check가 필요한다(ex. 티켓팅 이미 결제된 좌석)
+		if(originalBoardVO != null) { // 파일을 지우는 작업
+			
+			// 파일을 지워야 하기 때문에
+			// 기존 게시글에 첨부된 파일의 이름을 받아온다.
+			String storedFileName = originalBoardVO.getFileName();
+			// 첨부된 파일의 이름이 있는지 확인한다.
+			// 만약, 첨부된 파일의 이름이 있다면, 이 게시글은 파일이 첨부되었던 게시글이다.
+			if(storedFileName != null && storedFileName.length() > 0) {
+				// 이 경우라면 파일이 첨부된 적이 있다는 것이다.
+				
+				// 첨부된 파일을 삭제한다.
+				this.fileHandler.deleteFileByFileName(storedFileName);
+			}
+			
+		}
 		
 		int deletedCount = this.boardDao.deleteOneBoard(id);
+		return deletedCount > 0;
+	}
+	
+	@Transactional
+	@Override
+	public boolean deleteManyBoard(List<Integer> deleteItems) {
+		
+		List<BoardVO> originalBoardList = this.boardDao.selectManyBoard(deleteItems);
+		
+		// 첨부파일이 존재하는 게시글이라면 첨부파일을 삭제하는 코드.
+		for (BoardVO boardVO : originalBoardList) {
+			if(boardVO != null) { // 파일을 지우는 작업
+				
+				// 파일을 지워야 하기 때문에
+				// 기존 게시글에 첨부된 파일의 이름을 받아온다.
+				String storedFileName = boardVO.getFileName();
+				// 첨부된 파일의 이름이 있는지 확인한다.
+				// 만약, 첨부된 파일의 이름이 있다면, 이 게시글은 파일이 첨부되었던 게시글이다.
+				if(storedFileName != null && storedFileName.length() > 0) {
+					// 이 경우라면 파일이 첨부된 적이 있다는 것이다.
+					
+					// 첨부된 파일을 삭제한다.
+					this.fileHandler.deleteFileByFileName(storedFileName);
+				}
+				
+			}
+		}
+		
+		int deletedCount = this.boardDao.deleteManyBoard(deleteItems);
 		
 		return deletedCount > 0;
+	}
+
+	@Transactional
+	@Override
+	public boolean createMassiveBoard(MultipartFile excelFile) {
+		
+		int insertedCount = 0;
+		int rowSize = 0;
+		
+		// null이 아니고 실제 파일이 있다면
+		if(excelFile != null && !excelFile.isEmpty()) {
+			// 파일을 서버에 업로드
+			StoredFile storedExcel = this.fileHandler.storeFile(excelFile);
+			
+			// 파일이 null 일 수도 있기 때문에 null Check가 필요하다.
+			if(storedExcel != null) {
+				// 엑셀 파일을 읽는다.
+				
+				// 1. FileSystem에 있는 파일을 Java로 읽어와야 한다.(InputStream)
+				// InputStream: 추상 클래스, FileInputStream: 추상클래스 구현한 클래스
+				InputStream excelFileInputStream = null;
+				try {
+					excelFileInputStream = new FileInputStream(
+							storedExcel.getRealFilePath());
+				} catch (FileNotFoundException e) {
+//					e.printStackTrace();
+					logger.error(e.getMessage(), e);
+				}
+				
+				// 2. Apache POI를 활용해서 InputStream의 내용을 엑셀 문서로 읽어온다.
+				// 파일을 읽다가 에러가 생길 수도 있기 때문에 null Check가 필요
+				Workbook excelWorkbook = null;
+				if(excelFileInputStream != null) {
+					try {
+						excelWorkbook = new XSSFWorkbook(excelFileInputStream);
+					} catch (IOException e) {
+						logger.error(e.getMessage(), e);
+					}
+				}
+				
+				// 엑셀 파일의 특정 Sheet에 있는 모든 데이터를 찾아 List<BoardVO>로 만들어 준다.
+				List<BoardVO> boardListInExcel = new ArrayList<>();
+				
+				// 엑셀 파일을 잘 읽었다면
+				if(excelWorkbook != null) {
+					// Sheet를 추출.
+					Sheet sheet = excelWorkbook.getSheet("Sheet1");
+					
+					// Sheet에서 데이터가 있는 Row만큼 반복을 한다.
+					
+					// 1. Sheet에서 데이터가 몇개의 Row로 구성되어 있는지 확인한다.
+					rowSize = sheet.getPhysicalNumberOfRows();
+					
+					// 2. 첫 번째 Row부터 rowSize만큼 반복.
+					for(int i=1; i < rowSize; i++) {
+						// 첫 번째 Row는 Title이기 때문에 i=0은 제외해줘야 한다.
+						
+						// 3. i 번째 Row를 가져온다.
+						Row row = sheet.getRow(i);
+						
+						// 4. Row에 있는 Cell(게시글 정보)들을 가져온다.
+						String author = row.getCell(0).getStringCellValue();
+						String subject = row.getCell(1).getStringCellValue();
+						String description = row.getCell(2).getStringCellValue();
+						
+						// 엑셀에서 읽어온 데이터들을 BoardVO로 바꾸고
+						BoardVO boardVO = new BoardVO();
+						boardVO.setEmail(author);
+						boardVO.setSubject(subject);
+						boardVO.setContent(description);
+						
+						// boardVO를 boardList에 넣는다.
+						boardListInExcel.add(boardVO);
+					}
+				}
+				
+				// List<BoardVO>에 있는 내용을 모두 INSERT 한다.
+				for(BoardVO boardVO : boardListInExcel) {
+					// boardList를 반복하면서 엑셀에 있는 내용들을 전부 insert 해라.
+					insertedCount += this.boardDao.insertNewBoard(boardVO);
+				}
+			}
+		}
+		
+		// 한건 이상 insert했고, 내가 insert한 개수와 엑셀에 있는 row의 개수와 같다면 성공이다.
+		return insertedCount > 0 && insertedCount == rowSize - 1;
+	}
+
+	@Transactional
+	@Override
+	public boolean createMassiveBoard2(MultipartFile excelFile) {
+		
+		int insertedCount = 0;
+		int rowSize = 0;
+		
+		// null이 아니고 실제 파일이 있다면
+		if(excelFile != null && !excelFile.isEmpty()) {
+			// 파일을 서버에 업로드
+			StoredFile storedExcel = this.fileHandler.storeFile(excelFile, false);
+			
+			// 파일이 null 일 수도 있기 때문에 null Check가 필요하다.
+			if(storedExcel != null) {
+				
+				ReadOption readOption = new ReadOption();
+				readOption.setFilePath(storedExcel.getRealFilePath());
+				
+				List<BoardVO> boardListInExcel = new ExcelRead<BoardVO>()
+						.readToList(readOption, BoardVO.class);
+				
+				rowSize = boardListInExcel.size();
+				
+				// List<BoardVO>에 있는 내용을 모두 INSERT 한다.
+				for(BoardVO boardVO : boardListInExcel) {
+					// boardList를 반복하면서 엑셀에 있는 내용들을 전부 insert 해라.
+					insertedCount += this.boardDao.insertNewBoard(boardVO);
+				}
+			}
+		}
+		
+		// 한건 이상 insert했고, 내가 insert한 개수와 엑셀에 있는 row의 개수와 같다면 성공이다.
+		return insertedCount > 0 && insertedCount == rowSize;
 	}
 
 }

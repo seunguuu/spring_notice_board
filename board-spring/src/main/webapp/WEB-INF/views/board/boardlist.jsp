@@ -1,136 +1,196 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+pageEncoding="UTF-8"%> <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="UTF-8">
-<title>게시글 목록</title>
-<style type="text/css">
-    a:link, a:hover, a:visited, a:active {
-        color: #333;
-        text-decoration: none;
-    }
-
-    table.table {
-        border-collapse: collapse;
-        border: 1px solid #ddd;
-        table-layout: fixed;
-        width: 100%;
-    }
-
-    table.table > thead > tr {
-        background-color: #fff;
-    }
-
-    table.table > thead th {
-        padding: 10px;
-        color: #333;
-    }
-
-    table.table th, table.table td {
-        border-right: 1px solid #f0f0f0;
-    }
-
-    table.table th:last-child, table.table td:last-child {
-        border-right: none;
-    }
-
-    table.table > tbody tr:nth-child(odd) {
-        background-color: #f5f5f5;
-    }
-
-    table.table > tbody tr:hover {
-        background-color: #fafafa;
-    }
-
-    table.table > tbody td {
-        padding: 10px;
-        color: #333;
-    }
-
-    table.table > tbody td[colspan] {
-        text-align: center;
-    }
-
-    .ellipsis {
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        display: block;
-        width: 100%;
-    }
-
-    div.grid {
+  <head>
+    <meta charset="UTF-8" />
+    <sec:csrfMetaTags />
+    
+    <title>게시글 목록</title>
+    <jsp:include page="../commonheader.jsp"></jsp:include>
+    <style type="text/css">
+      div.grid {
         display: grid;
         grid-template-columns: 1fr;
-        grid-template-rows: 28px 1fr 28px;
+        grid-template-rows: 28px 1fr 28px 28px;
         row-gap: 10px;
-    }
-
-    div.grid div.right-align {
-        text-align: right;
-    }
-
-    .left-align {
-        text-align: left;
-    }
-</style>
-</head>
-<body>
+      }
+      div > a {
+        border: 1px solid #333;
+      }
+    </style>
+    <script type="text/javascript" src="/js/boardlist.js"></script>
+  </head>
+  <body>
+    <jsp:include page="../layout/layout.jsp" />
     <div class="grid">
-        <div class="right-align">
-            총 ${boardList.boardCnt} 건의 게시글이 검색되었습니다.
-        </div>
-        <table class="table">
-            <colgroup>
-                <col width="80px"/>
-                <col width="*px"/>
-                <col width="150px"/>
-                <col width="80px"/>
-                <col width="150px"/>
-                <col width="150px"/>
-            </colgroup>
-            <thead>
+      
+      <div class="right-align">
+        총 ${boardList.boardCnt} 건의 게시글이 검색되었습니다.
+      </div>
+      <table class="table">
+        <colgroup>
+          <sec:authorize access="hasRole('ADMIN')">
+            <col width="40px" />
+          </sec:authorize>
+          <col width="80px" />
+          <col width="*" />
+          <col width="150px" />
+          <col width="80px" />
+          <col width="150px" />
+          <col width="150px" />
+        </colgroup>
+        <thead>
+          <tr>
+            <sec:authorize access="hasRole('ADMIN')">
+              <th>
+                <input type="checkbox" id="checked-all" 
+                       data-target-class="target-board-id" />
+              </th>
+            </sec:authorize>
+            <th>번호</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>조회수</th>
+            <th>등록일</th>
+            <th>수정일</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- boardList의 내용이 존재한다면 (1개 이상 있다면)
+                내용을 반복하면서 보여주고
+                boardList의 내용이 존재하지 않는다면
+                "등록된 게시글이 없습니다. 첫 번째 글의 주인공이 되어보세요!" 를 보여준다.
+                jstl > choose when otherwise ==> Java if ~ else if ~ else -->
+          <!-- 조건식의 시작을 알림. -->
+          <c:choose>
+            <%-- boardList의 내용이 존재한다면 (1개 이상 있다면) --%>
+            <c:when test="${not empty boardList.boardList}">
+              <%-- 내용을 반복하면서 보여주고 --%>
+              <c:forEach items="${boardList.boardList}" var="board">
                 <tr>
-                    <th>번호</th>
-                    <th>제목</th>
-                    <th>이메일</th>
-                    <th>조회수</th>
-                    <th>등록일</th>
-                    <th>수정일</th>
+                  <sec:authorize access="hasRole('ADMIN')">
+                    <td>
+                      <input type="checkbox" class="target-board-id" 
+                             name="targetBoardId" value="${board.id}" />
+                    </td>
+                  </sec:authorize>
+                  <td class="center-align">${board.id}</td>
+                  <td class="left-align">
+                    <a class="ellipsis" href="/board/view?id=${board.id}">
+                      ${board.subject}
+                    </a>
+
+                    <c:if test="${not empty board.originFileName ne ''}">
+                      <a href="/board/file/download/${board.id}">
+                        첨부파일 다운로드
+                      </a>
+                    </c:if>
+                  </td>
+                  <td class="center-align">${board.memberVO.name}</td>
+                  <td class="center-align">${board.viewCnt}</td>
+                  <td class="center-align">${board.crtDt}</td>
+                  <td class="center-align">${board.mdfyDt}</td>
                 </tr>
-            </thead>
-            <tbody>
-                <c:choose>
-                    <c:when test="${not empty boardList.boardList}">
-                        <c:forEach items="${boardList.boardList}" var="board">
-                            <tr>
-                                <td>${board.id}</td>
-                                <td class="left-align">
-                                    <a class="ellipsis" href="/board/view?id=${board.id}">${board.subject}</a>
-                                </td>
-                                <td>${board.email}</td>
-                                <td>${board.viewCnt}</td>
-                                <td>${board.crtDt}</td>
-                                <td>${board.mdfyDt}</td>
-                            </tr>
-                        </c:forEach>
-                    </c:when>
-                    <c:otherwise>
-                        <tr>
-                            <td colspan="6">
-                                <a href="/board/write">등록된 게시글이 없습니다.</a>
-                            </td>
-                        </tr>
-                    </c:otherwise>
-                </c:choose>
-                
-            </tbody>
-        </table>
+              </c:forEach>
+            </c:when>
+            <%-- boardList의 내용이 존재하지 않는다면 --%>
+            <c:otherwise>
+              <tr>
+                <td colspan="6">
+                  <a href="/board/write">
+                    등록된 게시글이 없습니다. 첫 번째 글의 주인공이 되어보세요!
+                  </a>
+                </td>
+              </tr>
+            </c:otherwise>
+          </c:choose>
+        </tbody>
+      </table>
+
+      <!-- Paginator 시작 -->
+      <div>
+        <form id="search-form">
+          <input type="hidden" id="page-no" name="pageNo" value="0" />
+          <select id="list-size" name="listSize">
+            <!-- listSize의 값이 option 값과 같다면 selected 옵션 주기 -->
+            <option value="10" ${searchBoardVO.listSize eq 10 ? 'selected' : ''}>10개</option>
+            <option value="20" ${searchBoardVO.listSize eq 20 ? 'selected' : ''}>20개</option>
+            <option value="30" ${searchBoardVO.listSize eq 30 ? 'selected' : ''}>30개</option>
+            <option value="50" ${searchBoardVO.listSize eq 50 ? 'selected' : ''}>50개</option>
+            <option value="100" ${searchBoardVO.listSize eq 100 ? 'selected' : ''}>100개</option>
+          </select>
+
+          <select id="search-type" name="searchType">
+            <option value="title" ${searchBoardVO.searchType eq 'title' ? 'selected' : ''}>제목</option>
+            <option value="content" ${searchBoardVO.searchType eq 'content' ? 'selected' : ''}>내용</option>
+            <option value="title_content" ${searchBoardVO.searchType eq 'title_content' ? 'selected' : ''}>제목 + 내용</option>
+            <option value="email" ${searchBoardVO.searchType eq 'email' ? 'selected' : ''}>작성자</option>
+          </select>
+
+          <input type="text" name="searchKeyword" value="${searchBoardVO.searchKeyword}"/>
+          <button type="button" id="search-btn">검색</button>
+          <button type="button" id="cancel-search-btn">초기화</button>
+
+          <ul class="page-nav">
+            <c:if test="${searchBoardVO.hasPrevGroup}">
+              <!-- javascript에 있는 search 함수를 실행해라. 0을 전달 -->
+              <li><a href="javascript:search(0);">처음</a></li>
+              <li>
+                <a
+                  href="javascript:search(${searchBoardVO.prevGroupStartPageNo});"
+                  >이전</a
+                >
+              </li>
+            </c:if>
+            <!-- Page 번호를 반복하며 노출한다. -->
+            <c:forEach
+              begin="${searchBoardVO.groupStartPageNo}"
+              end="${searchBoardVO.groupEndPageNo}"
+              step="1"
+              var="p"
+            >
+              <li class="${searchBoardVO.pageNo eq p ? 'active' : ''}">
+                <a href="javascript:search(${p});">${p+1}</a>
+              </li>
+            </c:forEach>
+
+            <c:if test="${searchBoardVO.hasNextGroup}">
+              <li>
+                <a
+                  href="javascript:search(${searchBoardVO.nextGroupStartPageNo});"
+                  >다음</a
+                >
+              </li>
+              <li>
+                <a href="javascript:search(${searchBoardVO.pageCount - 1});"
+                  >마지막</a
+                >
+              </li>
+            </c:if>
+          </ul>
+        </form>
+      </div>
+      <!-- Paginator 끝 -->
+
+      <!-- Spring Security Context에 인증정보(Authenticate 객체)가 있는지 확인 -->
+      <!-- Spring Security로 로그인을 했다면 -->
+      <sec:authorize access="isAuthenticated()">
         <div class="right-align">
-            <a href="/board/write">게시글 등록</a>
+          <a href="/board/write">게시글 등록</a>
+          
+          <!-- ROLE_ADMIN 권한을 가진 사용자 일 때만 아래 메뉴를 노출. -->
+          <!-- Spring Security가 검사할때 'ROLE_' 를 자동으로 붙여서 검사를 한다. -->
+          <sec:authorize access="hasRole('ADMIN')">
+            <a href="/board/excel/download2">엑셀 다운로드</a>
+            <a id="deleteMassiveBoard" href="javascript:void(0);">일괄 삭제</a>
+            <a id="uploadExcelfile" href="javascript:void(0);">게시글 일괄 등록</a>
+            <input type="file" id="excelfile" style="display: none" />
+          </sec:authorize>
         </div>
+      </sec:authorize>
     </div>
-</body>
+    <jsp:include page="../layout/layout_close.jsp" />
+  </body>
 </html>
