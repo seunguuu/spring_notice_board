@@ -38,7 +38,10 @@ public class ApiBoardController {
 	public ApiResponse getBoardListPage(SearchBoardVO searchBoardVO) {
 		BoardListVO boardListVO = this.boardService.searchAllBoard(searchBoardVO);
 		
-		return ApiResponse.OK(boardListVO.getBoardList(), boardListVO.getBoardCnt(), 1, false);
+		// searchBoardVO.getPageCount(): 총 페이지 수
+		// searchBoardVO.getPageNo() < searchBoardVO.getPageCount() - 1: 다음 페이지가 있는지
+		return ApiResponse.OK(boardListVO.getBoardList(), boardListVO.getBoardCnt(), 
+				searchBoardVO.getPageCount(), searchBoardVO.getPageNo() < searchBoardVO.getPageCount() - 1);
 	}
 	
 	
